@@ -142,11 +142,14 @@ import sun.misc.Unsafe;
  * owning an exclusive synchronizer.  You are encouraged to use them
  * -- this enables monitoring and diagnostic tools to assist users in
  * determining which threads hold locks.
- *
+
+ 你也许也发现了从AbstractOwnableSynchronizer继承的方法被用来追踪 独占同步器的线程。
+ 我们鼓励你使用它，这样做使得监视器和诊断工具支持使用者判定持有锁的线程。
  * <p>Even though this class is based on an internal FIFO queue, it
  * does not automatically enforce FIFO acquisition policies.  The core
  * of exclusive synchronization takes the form:
- *
+即使这个类基于内部FIFO队列，但它并不会自动执行FIFO获取策略。独占同步的核心是以下形式：
+
  * <pre>
  * Acquire:
  *     while (!tryAcquire(arg)) {
@@ -160,6 +163,7 @@ import sun.misc.Unsafe;
  * </pre>
  *
  * (Shared mode is similar but may involve cascading signals.)
+ 共享模式类似，但可能涉及级联信号
  *
  * <p id="barging">Because checks in acquire are invoked before
  * enqueuing, a newly acquiring thread may <em>barge</em> ahead of
@@ -172,6 +176,11 @@ import sun.misc.Unsafe;
  * specifically designed to be used by fair synchronizers) returns
  * {@code true}.  Other variations are possible.
  *
+ 因为在进队之前会进行检查，一个新的正在获取锁的线程也许插队，直接闯到阻塞和排队的线程
+ 的前面。不过，你可以自定义tryAcquire或/和tryAcquireShared,调用多个检查方法
+ 阻止插队来实现公平的FIFo获取顺序。【注：插队发生的原因：多线程访问的情况下，如果一个线程在尝试获取
+ 锁的时候恰好锁被释放了，而队列的第一个元素还没有获取到锁，那么这时候这个尝试获取锁的线程
+ 就会插队，而队头元素会获取失败从而再次阻塞。】
  * <p>Throughput and scalability are generally highest for the
  * default barging (also known as <em>greedy</em>,
  * <em>renouncement</em>, and <em>convoy-avoidance</em>) strategy.
@@ -188,7 +197,21 @@ import sun.misc.Unsafe;
  * "fast-path" checks, possibly prechecking {@link #hasContended}
  * and/or {@link #hasQueuedThreads} to only do so if the synchronizer
  * is likely not to be contended.
- *
+ 
+默认的插队策略(其他叫法有贪婪获取，主动放弃, 队列避让【注：这里没找到对应的公共叫法】）一般拥有最高的吞吐量和扩展性，
+虽然这不保证公平性或者无饥饿【注：指某些线程一直获取不到锁】，但是先入队线程被允许比后入对的线程更早参与竞争，且每一次的竞争都是
+无偏见的。而且，虽然并不自旋获取，在一般意义上说，他们也许执行多次tryAcquire的调用，期间交叉这其他计算在阻塞之前。在锁持有较短时间
+的时候，这种做法也能获得跟自旋相同的优势，但如果并不是这样的话，他也不会有太大的损耗。你可以加强这个通过预先调用带有“fast-path”检查
+的方法，例如hasContended，hasQueuedThreads从而使得只在同步器也许没有竞争的时候做获取锁。
+【注：1 每一次获取锁的竞争是公平的，任何线程在竞争时获取的几率是相等的。
+      2 未入队线程若竞争到了锁，那可以说对队列中的元素不公平。
+	  3 已经入队的元素之间是公平的，因为要遵循先入先出原则。
+	  打个比方，买彩票，A先买了10年都没中奖，而B只买了一次就中奖了。虽然看上去对A不公平，但每次中奖的机率其实是一样的。这里A就是那个入队的线程，B就是那个
+	  虽然晚来但一次就获取到锁的线程。
+	  自旋获取在持有锁时间较短时比直接阻塞线程有很大的性能提升，因为线程的阻塞和唤醒都是耗时操作。但对于持有锁较长时间的情况，自旋相当于一直空耗CPU。
+	  这里tryAcquire先尝试获取几次，如果没有获取到再阻塞。就好像先自旋了一会，失败的话再阻塞一样，这样无论锁的获取时间短还是长，都能有较好的性能。
+	  hasContended，hasQueuedThreads都是判断队头是否为空，使用者可以用这个作为判断条件在一定程度上避免竞争。为什么是一定程度而不是肯定可以看这两个方法的说明。】
+
  * <p>This class provides an efficient and scalable basis for
  * synchronization in part by specializing its range of use to
  * synchronizers that can rely on {@code int} state, acquire, and
@@ -208,7 +231,9 @@ import sun.misc.Unsafe;
  * It also supports conditions and exposes
  * one of the instrumentation methods:
  *
- *  <pre> {@code
+ 这是一个非重入互斥独占所类，使用值0代表未锁，1代表锁定状态。虽然一个非重入锁并不严格要求记录当前持有锁的线程。这个类还是这样做了
+ ，以便更容易监控。它也支持条件和暴露一个指示方法：
+ 
  * class Mutex implements Lock, java.io.Serializable {
  *
  *   // Our internal helper class
