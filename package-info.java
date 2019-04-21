@@ -5,7 +5,7 @@
 这是一个关于这包的组件的简要的描述。你也可以看java.util.concurrent.locks 和java.util.concurrent.atomic包的内容
 Executors
 Interfaces。
-  Executor是一个简单的标准接口，用于定义自定义的类线程子系统。包括线程池，异步IO和轻量级任务框架。
+  Executor是一个简单的标准接口，用于自定义类似线程子系统。包括线程池，异步IO和轻量级任务框架。
 根据你选择的实体Executor类，任务可以在一个新创建的线程，一个已经存在的执行任务线程，或调用execute的线程中执行，并且可以顺序执行或者同步执行。
 ExecutorService提供更完整的异步任务执行框架。一个ExecutorService管理着任务的队列和调度，而且可以关闭自己。ScheduledExecutorService子接口和相关接口添加了
 一些关于任务延时执行，任务周期执行的功能。ExecutorService提供了安排异步执行任何任务的方法。这些任务抽象为Callable方法，可以理解为带有结果返回的Runnable方法。
