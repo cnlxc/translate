@@ -13,9 +13,9 @@ Future返回函数的结果，用来确定执行是否完成，
 并且提供了取消执行的方法。RunnableFutrue是一个拥有run方法的Future。在执行时设置其结果。
 
 Implementations。
-  类ThreadPoolExecutor和ScheduledThreadPoolExecutor提供了可调控，灵活的线程池
+  类ThreadPoolExecutor和ScheduledThreadPoolExecutor提供了可调控，灵活的线程池。
 类Executors不仅为创建通用配置的线程池提供了工厂方法，也为使用这些线程池提供了工具方法。其他基于Executors的工具包括FutureTask
-，一个Future接口的通用实现，ExecutorCompletionService，支持协调处理群体异步任务。
+，一个Future接口的通用实现;ExecutorCompletionService，支持协调处理群体异步任务。
 Class ForkJoinPool提供了一个执行器，主要是为了处理ForkJoinTask和他的子类。这些类采用任务偷取调度器来达到
 对计算密集平行处理任务的高吞吐。
 
@@ -30,7 +30,7 @@ BlockingDeque接口继承自BolckingQueue 他支持FIFO和LIFO，Class LinkedBlo
 
 Timing
 TimeUnit类提供
-  用于指定和控制基于超时的操作的多个粒度（包括纳秒）。该包的许多类都包含基于超时的操作，当然也可以无限等待。在所有使用超时等待的情况下，
+  用于指定和控制基于超时的操作的多个时间粒度（包括纳秒）。该包的许多类都包含基于超时的操作，当然也可以无限等待。在所有使用超时等待的情况下，
 超时指定了方法应该等待的最小时间。当超时发生时，实现类尽可能准确的检测到他们。（任何时间都不可能准确，例如等待5s，也许是等待了5.0001s，也可能是
 4.988888s）然而，一个线程在检测到超时后到他再次执行之间的时间并不确定。？？？？
 带有超时参数的方法，当传入的参数小于等于0时意味着一点也不要等待。若果你想一直等待的话，那可以使用Long.MAX_VALUE
