@@ -327,7 +327,7 @@ public interface Condition {
      * Causes the current thread to wait until it is signalled or interrupted,
      * or the specified waiting time elapses. This method is behaviorally
      * equivalent to:
-     *  <pre> {@code awaitNanos(unit.toNanos(time)) > 0}</pre>                                   上一个方法的指定时间单位的版本。
+     *  <pre> {@code awaitNanos(unit.toNanos(time)) > 0}</pre>                                   上一个方法是纳秒版本，这个可以指定时间单位。
      *
      * @param time the maximum time to wait
      * @param unit the time unit of the {@code time} argument
@@ -393,12 +393,12 @@ public interface Condition {
      * }}</pre>
      *
      * <p><b>Implementation Considerations</b>
-     *
-     * <p>The current thread is assumed to hold the lock associated with this
-     * {@code Condition} when this method is called.
-     * It is up to the implementation to determine if this is
-     * the case and if not, how to respond. Typically, an exception will be
-     * thrown (such as {@link IllegalMonitorStateException}) and the
+     *                     
+     * <p>The current thread is assumed to hold the lock associated with this                   
+     * {@code Condition} when this method is called.                                            跟上面方法的注释内容一模一样。唯一注意点是下述内容；
+     * It is up to the implementation to determine if this is                                   输入参数是给一个具体日期，而不是等待多长时间。
+     * the case and if not, how to respond. Typically, an exception will be                     例如等到2020年1月1日0时0分0秒这样，上面两个方法都
+     * thrown (such as {@link IllegalMonitorStateException}) and the                            是从方法开始之后经过多长时间返回。
      * implementation must document that fact.
      *
      * <p>An implementation can favor responding to an interrupt over normal
@@ -408,17 +408,17 @@ public interface Condition {
      * there is one.
      *
      * @param deadline the absolute time to wait until
-     * @return {@code false} if the deadline has elapsed upon return, else
+     * @return {@code false} if the deadline has elapsed upon return, else                       已经到了给定时间 返回值是false，否则返回true
      *         {@code true}
      * @throws InterruptedException if the current thread is interrupted
      *         (and interruption of thread suspension is supported)
      */
-    boolean awaitUntil(Date deadline) throws InterruptedException;
-
+    boolean awaitUntil(Date deadline) throws InterruptedException;                              
+                                                                                                
     /**
-     * Wakes up one waiting thread.
+     * Wakes up one waiting thread.                                                               唤醒一个等待线程
      *
-     * <p>If any threads are waiting on this condition then one
+     * <p>If any threads are waiting on this condition then one                                   唤醒wait线程，跟Object.notify差不多。没啥说的
      * is selected for waking up. That thread must then re-acquire the
      * lock before returning from {@code await}.
      *
@@ -434,7 +434,7 @@ public interface Condition {
     void signal();
 
     /**
-     * Wakes up all waiting threads.
+     * Wakes up all waiting threads.                                                             等价于notifyAll
      *
      * <p>If any threads are waiting on this condition then they are
      * all woken up. Each thread must re-acquire the lock before it can
