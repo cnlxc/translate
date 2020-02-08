@@ -1,0 +1,11 @@
+SQLSERVER
+添加约束
+ALTER TABLE Persons
+ADD CONSTRAINT df_City 
+DEFAULT 'Sandnes' FOR City;
+
+关于批量导入null值的处理
+https://docs.microsoft.com/zh-cn/sql/t-sql/queries/hints-transact-sql-table?view=sql-server-ver15
+
+关于批量导入相关限制的说明
+https://docs.microsoft.com/zh-cn/sql/relational-databases/import-export/prepare-data-for-bulk-export-or-import-sql-server?redirectedfrom=MSDN&view=sql-server-ver15
