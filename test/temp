@@ -9,3 +9,82 @@ https://docs.microsoft.com/zh-cn/sql/t-sql/queries/hints-transact-sql-table?view
 
 关于批量导入相关限制的说明
 https://docs.microsoft.com/zh-cn/sql/relational-databases/import-export/prepare-data-for-bulk-export-or-import-sql-server?redirectedfrom=MSDN&view=sql-server-ver15
+
+找到表ID
+SELECT OBJECT_ID(N'AdventureWorks2012.Production.WorkOrder') AS 'Object ID';  
+查看日志追踪是否开启
+select * from sys.configurations where configuration_id = 1568
+查看日志文件位置
+select * from ::fn_trace_getinfo(0)
+
+
+综合用法
+ where相关说明gt.[spid] > 50 AND --50以内的spid为系统使用
+    gt.[ObjectName] = 'fn_trace_getinfo' AND --根据objectname过滤
+    e.[category_id]  = 5 AND --category 5表示对象，8表示安全
+    e.[trace_event_id] = 46 
+    --trace_event_id 
+    --46表示Create对象（Object:Created），
+    --47表示Drop对象（Object:Deleted），
+    --93表示日志文件自动增长（Log File Auto Grow），
+    --164表示Alter对象（Object:Altered），
+    --20表示错误日志（Audit Login Failed）
+ORDER BY [StartTime] DESC
+
+SELECT *
+FROM fn_trace_gettable('C:\Program Files\Microsoft SQL Server\MSSQL11.SQLEXPRESS\MSSQL\Log\log.trc', DEFAULT) gt
+INNER JOIN sys.trace_events e
+on e.trace_event_id = gt.EventClass
+where spid > 50 
+and e.trace_event_id  = 164 
+and gt.ObjectID = '951674438'
+order by StartTime desc
+/***/**********************************************
+关于csv文件中有空值，插入到数据库时not null 列报不可为空的错误的处理思路
+1 先使用bulk insert试一试
+bulk insert dbo.test_null
+from 'C:\Users\82138\Desktop\test.txt'
+with
+(
+ FIRSTROW = 1,
+ FIELDTERMINATOR =',',
+ ROWTERMINATOR ='\n'
+ ,KEEPNULLs  //可选
+ )
+ 2 不行的话加格式文件再试一下
+        格式文件如下
+        <?xml version="1.0"?>  
+        <BCPFORMAT   
+                 xmlns="http://schemas.microsoft.com/sqlserver/2004/bulkload/format"   
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  
+          <RECORD>  
+            <FIELD ID="1" xsi:type="CharTerm" TERMINATOR=","   
+              MAX_LENGTH="10"/>     
+
+            <FIELD ID="2" xsi:type="CharTerm" TERMINATOR="\r\n"   
+              MAX_LENGTH="10"/>     
+          </RECORD> 
+          <ROW>  
+            <COLUMN SOURCE="1" NAME="test" xsi:type="SQLVARYCHAR" NULLABLE ="YES"/>
+            <COLUMN SOURCE="2" NAME="t2" xsi:type="SQLVARYCHAR" NULLABLE ="YES"/>
+          </ROW>  
+        </BCPFORMAT> 
+        语句如下
+        INSERT INTO dbo.test_null
+            SELECT *
+            FROM OPENROWSET (
+                BULK 'C:\Users\82138\Desktop\test.txt',
+                FORMATFILE = 'C:\Users\82138\Desktop\for.xml'  
+               ) AS t1;
+         或者
+           BULK INSERT dbo.test_null   
+           FROM 'C:\Users\82138\Desktop\test.txt'   
+           WITH (FORMATFILE = 'C:\Users\82138\Desktop\for.xml');  
+           
+3  加空值约束
+4  没办法了，那就使用mapping设固定值
+           
+     
+               
+               
+
