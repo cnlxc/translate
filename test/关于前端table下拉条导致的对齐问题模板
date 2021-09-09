@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>设置表格有滚动条</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
+
+            table {
+                /*设置相邻单元格的边框间的距离*/
+                border-spacing: 0;
+                /*表格设置合并边框模型*/
+                border-collapse: collapse;
+                text-align: center;
+            }
+            /*关键设置 tbody出现滚动条*/
+            table tbody {
+                display: block;
+                height: 80px;
+                overflow-y: scroll;
+            }
+
+            table thead,
+            tbody tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+            /*关键设置：滚动条默认宽度是16px 将thead的宽度减16px*/
+            table thead {
+                width: calc( 100% - 1em)
+            }
+
+
+            table thead th {
+                background: #ccc;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <table width="80%" border="1">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>年龄</th>
+                    <th>出生年月</th>
+                    <th>手机号码</th>
+                    <th>单位</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>张三</td>
+                    <td>18</td>
+                    <td>1990-9-9</td>
+                    <td>13682299090</td>
+                    <td>阿里巴巴</td>
+                </tr>
+                <tr>
+                    <td>李四</td>
+                    <td>18</td>
+                    <td>1990-9-9</td>
+                    <td>13682299090</td>
+                    <td>阿里巴巴与四十大盗</td>
+                </tr>
+                <tr>
+                    <td>王五</td>
+                    <td>18</td>
+                    <td>1990-9-9</td>
+                    <td>13682299090</td>
+                    <td>腾讯科技</td>
+                </tr>
+                <tr>
+                    <td>孟想</td>
+                    <td>18</td>
+                    <td>1990-9-9</td>
+                    <td>13682299090</td>
+                    <td>浏阳河就业</td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+
+</html>
