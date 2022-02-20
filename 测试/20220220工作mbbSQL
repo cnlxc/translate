@@ -1,5 +1,5 @@
---同一发令日的时候是按照timestamp来判断哪一条最新吗
-
+——发令日的时间是同一时间戳来判断哪一条最新吗
+——发令日NULL和不知道区分开来，把不知道先设定位00所以请确认一下0的含义
 
 SELECT  R.COMPANYID,R.ANNOUCEDAY,R.EMP_CD
 ,(select MAX(ANNOUCEDAY) FROM empcostfuncif
