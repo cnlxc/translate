@@ -1,0 +1,139 @@
+package com.example.demo.util;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+
+/**
+ * Created by 82138 on 2022/6/19.
+ */
+@Controller
+@RequestMapping("file")
+控制器
+public class PdfDownload {
+    @Value("${file.upload.url}")
+    private String filePath;
+
+    @RequestMapping()
+    public String fileDownload(HttpServletResponse response, @RequestParam("filename") String fileName, Model model){
+        File file = new File(filePath + "/" + fileName);
+        System.out.println(file.getAbsolutePath());
+        if (!file.exists()) {
+            model.addAttribute("message","不存在");
+            return "err/error";
+        }
+        response.reset();
+        response.setContentType("application/octet-stream");
+        response.setCharacterEncoding("utf-8");
+        response.setContentLength((int) file.length());
+        response.setHeader("Content-Disposition", "attachment;filename=" + fileName );
+
+        try(BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));) {
+            byte[] buff = new byte[1024];
+            OutputStream os  = response.getOutputStream();
+            int i = 0;
+            while ((i = bis.read(buff)) != -1) {
+                os.write(buff, 0, i);
+                os.flush();
+            }
+        } catch (IOException e) {
+            model.addAttribute("message","异常发生");
+            return "err/error";
+        }
+        //model.addAttribute("message","正常下载");
+        return "err/error";
+    }
+}
+
+PDF做成
+package com.example.demo.util;
+
+import java.io.*;
+
+/**
+ * Created by 82138 on 2022/6/18.
+ */
+public class Html2Pdf {
+    //wkhtmltopdf在系统中的路径
+    private static final String toPdfTool = "C:\\Users\\82138\\Desktop\\wkhtmltox-0.12.6-1.mxe-cross-win64\\wkhtmltox\\bin\\wkhtmltopdf.exe";
+
+    /**
+     * html转pdf
+     * @param srcPath html路径，可以是硬盘上的路径，也可以是网络路径
+     * @param destPath pdf保存路径
+     * @return 转换成功返回true
+     */
+    public static boolean convert(String srcPath, String destPath){
+        File file = new File(destPath);
+        File parent = file.getParentFile();
+        //如果pdf保存路径不存在，则创建路径
+        if(!parent.exists()){
+            parent.mkdirs();
+        }
+
+        StringBuilder cmd = new StringBuilder();
+        cmd.append(toPdfTool);
+        cmd.append(" ");
+        //cmd.append("  --no-collate ");//页眉下面的线
+
+
+        cmd.append(srcPath);
+        cmd.append(" --cookie JSESSIONID AF898D21FD2803E4CC891A0A1BE7DDF3");
+        cmd.append(" ");
+        cmd.append(destPath);
+        System.out.println(cmd);
+        boolean result = true;
+        try{
+            Process proc = Runtime.getRuntime().exec(cmd.toString());
+            HtmlToPdfInterceptor error = new HtmlToPdfInterceptor(proc.getErrorStream());
+            HtmlToPdfInterceptor output = new HtmlToPdfInterceptor(proc.getInputStream());
+            error.start();
+            output.start();
+            proc.waitFor();
+        }catch(Exception e){
+            result = false;
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    //http://localhost:8080/toppage
+    public static void main(String[] args) {
+        Html2Pdf.convert("http://localhost:8080/subpage http://localhost:8080/toppage", "C:\\Users\\82138\\Desktop\\pdfTest\\wkhtmltopdf.pdf");
+    }
+}
+/**
+ * @ClassName: HtmlToPdfInterceptor
+ * @Description: TODO()
+ * @author xsw
+ * @date 2016-12-8 上午10:17:33
+ *
+ */
+
+class HtmlToPdfInterceptor extends Thread {
+    private InputStream is;
+
+    public HtmlToPdfInterceptor(InputStream is){
+        this.is = is;
+    }
+
+    public void run(){
+        try{
+            InputStreamReader isr = new InputStreamReader(is, "utf-8");
+            BufferedReader br = new BufferedReader(isr);
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line.toString()); //输出内容
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+}
