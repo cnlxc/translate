@@ -1,0 +1,45 @@
+Sub FindDeadlockCombinations()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim lastColumn As Long
+    Dim batchRange As Range
+    Dim batch As Range
+    Dim tableRange As Range
+    Dim table As Range
+    Dim deadlock As String
+    Dim i As Long, j As Long, k As Long, l As Long
+    
+    ' 设置工作表
+    Set ws = ThisWorkbook.Sheets("Sheet1") ' 将 "Sheet1" 替换为您的工作表名称
+    
+    ' 获取最后一行和最后一列
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    lastColumn = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' 定义 batch 和 table 的范围
+    Set batchRange = ws.Range(ws.Cells(2, 2), ws.Cells(lastRow, lastColumn))
+    Set tableRange = ws.Range(ws.Cells(2, 2), ws.Cells(lastRow, lastColumn))
+    
+    ' 清空输出
+    ws.Range("E2:Z" & lastRow).Clear
+    
+    ' 遍历每个 batch 组合
+    For i = 2 To lastRow
+        For j = i + 1 To lastRow
+            deadlock = ""
+            ' 遍历每个表
+            For k = 2 To lastColumn
+                If tableRange.Cells(i, k).Value = "X" And tableRange.Cells(j, k).Value = "X" Then
+                    deadlock = deadlock & ws.Cells(1, k).Value & ", "
+                End If
+            Next k
+            ' 如果发生死锁，输出到结果列
+            If deadlock <> "" Then
+                ws.Cells(i, lastColumn + 2).Value = ws.Cells(i, 1).Value
+                ws.Cells(j, lastColumn + 2).Value = ws.Cells(j, 1).Value
+                ws.Cells(i, lastColumn + 3).Value = deadlock
+                ws.Cells(j, lastColumn + 3).Value = deadlock
+            End If
+        Next j
+    Next i
+End Sub
