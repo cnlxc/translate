@@ -1,0 +1,6 @@
+--IO
+SELECT object_name, object_type, value
+FROM v$segment_statistics
+WHERE statistic_name = 'physical reads'
+ORDER BY value DESC;
+
